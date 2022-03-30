@@ -1,12 +1,11 @@
-all: diff
+all: diff sequence.o
 
 clean:
-	@rm -f randport randport.txt *~
+	@rm -f randport randport.txt modern.txt *~
 
-diff: randdvec.txt randport.txt modern.txt sequence.txt
+diff: randdvec.txt randport.txt modern.txt
 	@diff randdvec.txt randport.txt
 	@diff randdvec.txt modern.txt
-	@diff randdvec.txt sequence.txt
 
 #
 #  Wildcard rule to build output files
