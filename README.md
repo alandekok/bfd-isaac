@@ -1,10 +1,18 @@
-# BFD API
+# BFD ISAAC / FNV1A API
 
-The BFD API is composed of two files:
+This repository implements an API for BFD Auth Types Meticulous Keyed
+[ISAAC](ISAAC.md), and Meticulous Keyed
+[FNV1A](http://www.isthe.com/chongo/tech/comp/fnv/).  These methods
+are complex enough that it is useful to give a sample API
+implementation.
+
+The API is composed of two files:
 
 * `sequence.h`, which contains the data structures and function prototypes.
 
 * `sequence.c` which contains the API implementation
+
+The code here is in the public domain.
 
 The various `ctx` structures are public in order to allow the caller
 to know the correct size for allocations.  The fields of the data
@@ -14,7 +22,7 @@ The code does not do any memory allocations.  The only dependency on
 external functions is `memset()` and `memcpy()`.  As a result, it
 should be fairly easy to port it to any other systems.
 
-These funtions are NOT thread-safe.
+These functions are NOT thread-safe.
 
 The functions assume that they are operating on a packet which is
 stored as an array of `uint8_t` bytes.  That is, on send, the caller should

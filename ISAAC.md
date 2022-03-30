@@ -12,6 +12,10 @@ The `randport.c` has been copied to `modern.c`, and updated to use
 more modern C prototypes, integers, and styles.  Otherwise, the output
 is exactly the same.
 
+The `sequence.c` file is the `modern.c` file, but with the [BFD
+API](README.md) added, and some additional minor code changes to make
+it easier to implement the API.
+
 ## Running
 
 You can test ISAAC simply by doing:
@@ -44,4 +48,4 @@ abbb0f5f393cd98bee11d0ff1be9db5c1b6457ea9d6de0c3e71ba7ac9a557ac3
 
 ## BFD API
 
-The BFD API is documented in the [BFD API](sequence.md) file.
+The BFD API is documented in the [BFD API](README.md) file.
