@@ -2,4 +2,6 @@ randport
 randport.txt
 modern
 modern.txt
+sequence
+*.o
 *~
