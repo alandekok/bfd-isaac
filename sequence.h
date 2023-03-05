@@ -37,7 +37,3 @@ void bfd_isaac_churn(bfd_isaac_ctx *ctx);
 void bfd_isaac_sequence_next(bfd_isaac_ctx *ctx, uint8_t *sequence, uint8_t *auth_key);
 
 int bfd_isaac_sequence_check(bfd_isaac_ctx *ctx, uint8_t const *sequence, uint8_t const *auth_key);
-
-void bfd_isaac_fnv1a_next(bfd_isaac_ctx *ctx, uint32_t *sequence, uint32_t *digest, uint8_t const *packet, size_t packetlen);
-
-int bfd_isaac_fnv1a_check(bfd_isaac_ctx *ctx, uint8_t const *sequence, uint8_t *digest, uint8_t const *packet, size_t packetlen);

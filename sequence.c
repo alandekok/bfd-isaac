@@ -201,64 +201,6 @@ void bfd_isaac_sequence_next(bfd_isaac_ctx *ctx, uint8_t *sequence, uint8_t *aut
 	to_network(sequence, r);
 }
 
-#define FNV_MAGIC_INIT (0x811c9dc5)
-#define FNV_MAGIC_PRIME (0x01000193)
-
-/*
- *	FNV-1A from:
- *
- *	http://www.isthe.com/chongo/tech/comp/fnv/
- */
-static uint32_t fnv1a_update(const uint8_t *data, size_t datalen, uint32_t hash)
-{
-	uint8_t const *end = data + datalen;
-
-	if (datalen == 0) return hash;
-
-	while (data < end) {
-		hash ^= (uint32_t) (*data++);
-
-		/*
-		 *	The multiply can be replaced with
-		 *
-		 *	hash += (hash<<1) + (hash<<4) + (hash<<7) + (hash<<8) + (hash<<24);
-		 */
-		hash *= FNV_MAGIC_PRIME;
-	}
-
-	return hash;
-}
-
-#define fnv1a(_a, _b) fnv1a_update(_a, _b, FNV_MAGIC_INIT)
-
-/*
- *	Calculate the FNV-1A hash over the (R + packet + R).
- */
-void bfd_isaac_fnv1a_next(bfd_isaac_ctx *ctx, uint32_t *sequence, uint32_t *digest, uint8_t const *data, size_t datalen)
-{
-	bfd_isaac_randctx *randctx = &ctx->randctx[ctx->active];
-	uint8_t	array[4];
-	uint32_t r, hash;
-
-	if (randctx->index > 256) {
-		isaac(randctx);
-		ctx->next_page_valid = 0;
-	}
-
-	*digest = 0;
-	r = ctx->sequence++;
-	to_network(((uint8_t *) sequence), r);
-	
-	r = randctx->page[randctx->index++];
-	to_network(array, r);
-
-	hash = fnv1a(&array[0], 4);
-	hash = fnv1a_update(data, datalen, hash);
-	hash = fnv1a_update(&array[0], 4, hash);
-
-	to_network(((uint8_t *) digest), hash);
-}
-
 static int sequence_offset(bfd_isaac_ctx *ctx, uint32_t sequence)
 {
 	bfd_isaac_randctx *randctx = &ctx->randctx[ctx->active];
@@ -384,39 +326,6 @@ int bfd_isaac_sequence_check(bfd_isaac_ctx *ctx, uint8_t const *sequence, uint8_
 
 	next_page = get_checked_rand(ctx, offset, &expected);
 	if (expected != from_network(auth_key)) {
-		return -2;
-	}
-
-	return swap_to_page(ctx, offset, next_page);
-}
-
-int bfd_isaac_fnv1a_check(bfd_isaac_ctx *ctx, uint8_t const *sequence, uint8_t *digest, uint8_t const *data, size_t datalen)
-{
-	bfd_isaac_randctx *randctx = &ctx->randctx[ctx->active];
-	int offset, next_page;
-	uint8_t array[4];
-	uint32_t r, hash, expected;
-	
-	offset = sequence_offset(ctx, from_network(sequence));
-	if (offset < 0) return -1;
-
-	next_page = get_checked_rand(ctx, offset, &r);
-
-	to_network(array, r);
-
-	/*
-	 *	Remember what's in the packet, then calculate our hash.
-	 */
-	expected = from_network(digest);
-	memset(digest, 0, 4);
-
-	hash = fnv1a(&array[0], 4);
-	hash = fnv1a_update(data, datalen, hash);
-	hash = fnv1a_update(&array[0], 4, hash);
-
-	memcpy(digest, &expected, 4);
-
-	if (hash != expected) {
 		return -2;
 	}
 

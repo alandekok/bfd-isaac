@@ -1,8 +1,7 @@
-# BFD ISAAC / FNV1A API
+# BFD ISAAC
 
 This repository implements an API for BFD Auth Types Meticulous Keyed
-[ISAAC](ISAAC.md), and Meticulous Keyed
-[FNV1A](http://www.isthe.com/chongo/tech/comp/fnv/).  These methods
+[ISAAC](ISAAC.md) method.  This method
 are complex enough that it is useful to give a sample API
 implementation.
 
@@ -117,66 +116,6 @@ The function returns:
 * `0` for success 
 * `-1` when the `sequence` number is out of bounds
 * `-2` when the supplied `auth_key` does not match the expected ISAAC output for that `sequence` number.
-
-Due to the limitations of the current implementation, this API is
-guaranteed to handle at least 256 lost packets, but not more than
-that.  In some cases, it can handle 511 lost packets, but those cases
-are rare.
-
-## Meticulous Keyed FNV1A API
-
-Once the `ctx` has been initialized, it can be used to send and
-receive packets.
-
-### Sending packets
-
-`void bfd_isaac_fnv1a_next(bfd_isaac_ctx *ctx, uint8_t *sequence, uint8_t *digest, uint8_t const *packet, size_t packetlen)`
-
-This function takes a `ctx`, and stores the `digest` at the given location.
-
-The `sequence` and `digest` variables should point to the relevant
-fields in the Auth Type structure of a BFD packet.  There should be
-room to write four (4) octets of data.  The values are written in
-network byte order.
-
-The `digest` is set to `0`, the hash calculated, and then the results
-stored in the `digest` location in network byte order.
-
-The sequence number is automatically incremented every time this
-function is called.  The sequence number automatically wraps at
-2^32.
-
-The hash is calculated using the _network byte order_ of the ISAAC
-output.  This is so that the calculation is the same for any machine,
-no matter what the host byte order.
-
-The function cannot fail, and returns nothing.
-
-### Receiving Packets
-
-`int bfd_isaac_fnv1a_check(bfd_isaac_ctx *ctx, uint8_t const *sequence, uint8_t *digest, uint8_t const *packet, size_t packetlen)`
-
-This function takes a `ctx`, and checks if the `sequence` and `digest`
-match what is expected.  Note that this function does not perform any
-checks that the `packet` is a correctly formed BFD packet, or that the
-`Auth Type` value and format matches that of Meticulous Keyed FNV1A.
-The application still must perform all of those checks before calling
-this function.
-
-The `sequence` and `digest` variables should point to the relevant
-fields in the Auth Type structure of a BFD packet.  There should be
-room to read four (4) octets of data.  The values should be in network
-byte order, as received from the network.
-
-The check saves the `digest` value, sets the `digest` value to zero,
-calculates the expected hash for the particular `sequence`, and then
-compares that calculated value to the saved `digest` value.
-
-The function returns:
-
-* `0` for success 
-* `-1` when the `sequence` number is out of bounds
-* `-2` when the supplied `digest` does not match the expected hash output for that `sequence` number.
 
 Due to the limitations of the current implementation, this API is
 guaranteed to handle at least 256 lost packets, but not more than
