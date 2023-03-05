@@ -1,7 +1,7 @@
 all: diff sequence.o
 
 clean:
-	@rm -f randport randport.txt modern.txt *~
+	@rm -f randport randport.txt modern.txt sequence *.o *~
 
 diff: randdvec.txt randport.txt modern.txt
 	@diff randdvec.txt randport.txt
@@ -28,5 +28,5 @@ modern: modern.c
 #
 #  Tracking BFD sequence numbers
 #
-sequence.o: sequence.c
-	@$(CC) -c $< -o $@
+sequence: sequence.c
+	@$(CC) -DNEVER $< -o $@
